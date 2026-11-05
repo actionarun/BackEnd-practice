@@ -1,0 +1,475 @@
+# DAY 1 – MONGODB & MONGOOSE NOTES
+
+## 1. What is MongoDB?
+
+MongoDB is a NoSQL database used to store and manage data in flexible document format.
+
+**Tamil:** MongoDB oru NoSQL database. Idhula data documents format-la store aagum.
+
+## 2. SQL vs NoSQL
+
+| SQL | NoSQL |
+|---|---|
+| Structured database | Flexible database |
+| Tables, rows, columns | Collections, documents |
+| Fixed schema | Flexible schema |
+| Example: MySQL | Example: MongoDB |
+
+## 3. MongoDB Structure
+
+- Database – Collection of collections.
+- Collection – Group of documents.
+- Document – Individual data record.
+- Fields – Document-la irukkura properties.
+
+Example:
+
+```json
+{
+  "name": "Arun",
+  "age": 21,
+  "course": "Full Stack",
+  "marks": 85
+}
+```
+
+## 4. BSON
+
+BSON means Binary JSON.
+
+MongoDB internally BSON format-la documents store pannum.
+
+## 5. MongoDB CRUD Operations
+
+CRUD means:
+
+- C – Create
+- R – Read
+- U – Update
+- D – Delete
+
+### CREATE
+
+Insert one document:
+
+```js
+db.students.insertOne({
+  name: "Arun",
+  age: 21,
+  marks: 85
+})
+```
+
+Insert multiple documents:
+
+```js
+db.students.insertMany([
+  { name: "Arun", age: 21 },
+  { name: "Kumar", age: 22 }
+])
+```
+
+### READ
+
+Find all documents:
+
+```js
+db.students.find()
+```
+
+Find one document:
+
+```js
+db.students.findOne({
+  name: "Arun"
+})
+```
+
+### UPDATE
+
+Update one document:
+
+```js
+db.students.updateOne(
+  { name: "Arun" },
+  { $set: { age: 22 } }
+)
+```
+
+Update multiple documents:
+
+```js
+db.students.updateMany(
+  { marks: { $gt: 80 } },
+  { $set: { grade: "A" } }
+)
+```
+
+### DELETE
+
+Delete one document:
+
+```js
+db.students.deleteOne({
+  name: "Arun"
+})
+```
+
+Delete multiple documents:
+
+```js
+db.students.deleteMany({
+  marks: { $lt: 40 }
+})
+```
+
+**Important:** Empty filter `{}` use pannina deleteMany all documents-ai delete pannidum. Careful!
+
+## 6. MongoDB Query Operators
+
+| Operator | Meaning |
+|---|---|
+| `$gt` | Greater than |
+| `$lt` | Less than |
+| `$gte` | Greater than or equal |
+| `$lte` | Less than or equal |
+| `$eq` | Equal |
+| `$ne` | Not equal |
+| `$in` | Matches any value in an array |
+
+Examples:
+
+```js
+db.students.find({ age: { $gt: 20 } })
+
+db.students.find({ marks: { $lt: 70 } })
+
+db.students.find({ age: { $gte: 21 } })
+
+db.students.find({ course: { $in: ["MERN", "React"] } })
+```
+
+## 7. Sorting
+
+Sorting means arranging data in ascending or descending order.
+
+Ascending:
+
+```js
+db.students.find().sort({ age: 1 })
+```
+
+Descending:
+
+```js
+db.students.find().sort({ age: -1 })
+```
+
+- `1` – Ascending (small to big)
+- `-1` – Descending (big to small)
+
+## 8. Limit
+
+Limit means restricting the number of documents.
+
+```js
+db.students.find().limit(3)
+```
+
+Returns maximum 3 documents.
+
+## 9. Projection
+
+Projection means selecting only the required fields.
+
+```js
+db.students.find(
+  {},
+  { name: 1, marks: 1, _id: 0 }
+)
+```
+
+- `1` – Include field.
+- `0` – Exclude field.
+- `_id: 0` – Hide MongoDB ID.
+
+**Real-time example – Top 3 students:**
+
+```js
+db.students.find(
+  {},
+  { name: 1, marks: 1, _id: 0 }
+)
+.sort({ marks: -1 })
+.limit(3)
+```
+
+## 10. What is Mongoose?
+
+Mongoose is an ODM library for Node.js. It helps us connect and interact with MongoDB using schemas and models.
+
+**ODM – Object Data Modeling.**
+
+### MongoDB vs Mongoose
+
+- MongoDB – Database.
+- Mongoose – Node.js library used to interact with MongoDB.
+
+## 11. What is Schema?
+
+Schema defines the structure of a document, including fields, data types and validation rules.
+
+Example:
+
+```js
+const studentSchema = new mongoose.Schema({
+  name: String,
+  age: Number,
+  email: String,
+  course: String,
+  marks: Number
+});
+```
+
+### Important Schema options
+
+```js
+email: {
+  type: String,
+  required: true,
+  unique: true
+}
+```
+
+- `type` – Data type.
+- `required: true` – Field is compulsory.
+- `unique: true` – Duplicate values are not allowed.
+
+## 12. What is Model?
+
+Model is created from a Schema. It is used to perform CRUD operations in MongoDB.
+
+```js
+const Student = mongoose.model(
+  "Student",
+  studentSchema
+);
+```
+
+**Remember:**
+
+- Schema – Defines document structure.
+- Model – Performs database operations.
+
+## 13. MongoDB Connection Using Mongoose
+
+Install:
+
+```bash
+npm init -y
+npm install mongoose
+npm install -D nodemon
+```
+
+If `package.json` has `"type": "module"`, use ES Module syntax.
+
+```js
+import mongoose from "mongoose";
+
+async function connectDB() {
+  try {
+    await mongoose.connect(
+      "mongodb://127.0.0.1:27017/CollegeDB"
+    );
+
+    console.log("MongoDB Connected Successfully");
+
+  } catch (error) {
+    console.log("Database Connection Failed", error);
+  }
+}
+
+connectDB();
+```
+
+Run:
+
+```bash
+npm run dev
+```
+
+**Note:** Local MongoDB Community Server must be installed and running for this local connection to work.
+
+## 14. Mongoose CRUD Operations
+
+### CREATE
+
+```js
+const student = await Student.create({
+  name: "Arun",
+  age: 21,
+  email: "arun@gmail.com",
+  course: "Full Stack",
+  marks: 85
+});
+```
+
+### READ
+
+Find all:
+
+```js
+const students = await Student.find();
+```
+
+Find one:
+
+```js
+const student = await Student.findOne({
+  email: "arun@gmail.com"
+});
+```
+
+Find by ID:
+
+```js
+const student = await Student.findById(id);
+```
+
+### UPDATE
+
+Find by email and update:
+
+```js
+const student = await Student.findOneAndUpdate(
+  { email: "arun@gmail.com" },
+  { $set: { marks: 90 } },
+  { new: true }
+);
+```
+
+`new: true` returns the updated document.
+
+### DELETE
+
+```js
+const student = await Student.findOneAndDelete({
+  email: "arun@gmail.com"
+});
+```
+
+## 15. Async and Await
+
+`async/await` is used to handle asynchronous operations in JavaScript.
+
+- `async` – Makes a function asynchronous and allows it to use await.
+- `await` – Pauses that async function until the Promise settles.
+
+Example:
+
+```js
+async function getStudents() {
+  const students = await Student.find();
+  console.log(students);
+}
+```
+
+Function calls:
+
+```js
+await getStudents();
+await updateStudent();
+```
+
+Using `await` makes the first operation complete before the next one starts.
+
+## 16. Important Errors We Practiced
+
+### Error 1: require is not defined
+
+Reason: Project uses `"type": "module"`.
+
+Wrong:
+
+```js
+const mongoose = require("mongoose");
+```
+
+Correct:
+
+```js
+import mongoose from "mongoose";
+```
+
+### Error 2: E11000 Duplicate Key Error
+
+Reason: Same email already exists and Schema has `unique: true`.
+
+Solution: Use a new email or check whether the email already exists before creating a student.
+
+```js
+const existingStudent = await Student.findOne({
+  email: "arun@gmail.com"
+});
+
+if (existingStudent) {
+  console.log("Email already exists");
+} else {
+  await Student.create({
+    name: "Arun",
+    age: 21,
+    email: "arun@gmail.com"
+  });
+}
+```
+
+### Error 3: Cast to ObjectId failed
+
+Reason: Passing an email object to `findByIdAndUpdate()`.
+
+Wrong:
+
+```js
+Student.findByIdAndUpdate(
+  { email: "arun@gmail.com" },
+  { marks: 90 }
+);
+```
+
+Correct:
+
+```js
+Student.findOneAndUpdate(
+  { email: "arun@gmail.com" },
+  { marks: 90 },
+  { new: true }
+);
+```
+
+**Remember:**
+- `findByIdAndUpdate()` – Search by document ID.
+- `findOneAndUpdate()` – Search by any condition.
+
+---
+
+# DAY 1 – INTERVIEW QUESTIONS & ANSWERS
+
+**1. What is MongoDB?**
+
+MongoDB is a NoSQL database used to store and manage data in flexible document format.
+
+**2. What is the difference between SQL and NoSQL?**
+
+SQL stores data in tables, rows and columns. NoSQL stores data in flexible formats like documents.
+
+**3. What is Mongoose?**
+
+Mongoose is an ODM library for Node.js. It helps us interact with MongoDB.
+
+**4. What is Schema?**
+
+Schema defines the structure of a document, including fields and data types.
+
+**5. What is Model?**
+
+Model is created from a Schema and is used to perform CRUD operations.
