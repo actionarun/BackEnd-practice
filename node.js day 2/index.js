@@ -25,9 +25,59 @@ app.post("/students",(req,res)=>{
     });
 }) 
 
+// PUT - Update student
+app.put("/students/:id",(req,res)=>{
+    const id = Number(req.params.id)
+    const student =students.find((s)=> s.id === id)
+
+    if(!student){
+        return res.status(404).json({
+            message:"student not found"
+        })
+    }
+    student.name=req.body.name
+    student.age=req.body.age
+
+    res.json({
+        message:"studdent update sussfully",
+        data:student
+    })
+})
+
+
+// DELETE - Delete student
+
+app.delete("/students/:id",(req,res)=>{
+    const id =Number(req.params.id)
+    const student =students.find((s)=> s.id===id)
+
+    if(!student){
+        return res.status(404).json({
+            message:"student not found"
+        })
+    }
+    students =students.filter((s)=>s.id !==id)
+
+    res.json({
+        message:"student delete sussfully"
+    })
+})
 app.get("/", (req, res) => {
     res.send("Welcome to Express.js");
 });     //GET route create செய்கிறோம்
+
+app.get("/students/:id", (req, res) => {
+    res.json({
+        studentId: req.params.id
+    });
+});
+
+app.get("/search", (req, res) => {
+    res.json({
+        studentName: req.query.name,
+        course: req.query.course
+    });
+});
 
 app.listen(3000, () => {
     console.log("Server running on port 3000");
