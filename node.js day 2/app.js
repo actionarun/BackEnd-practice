@@ -30,6 +30,20 @@ app.get("/profile",authMiddleware,(req,res)=>{
       res.send("Welcome to your profile");
 })
 
+app.get("/error",(req,res,next)=>{
+    const error = new Error("Something went wrong");
+    next(error);
+})
+
+// Global Error Handler
+app.use((err,req,res,next)=>{
+    console.error(err.stack);
+    res.status(500).json({
+        message: err.message
+    })
+})
+
+
 // Register middleware
 app.use(myMiddleware);
 
