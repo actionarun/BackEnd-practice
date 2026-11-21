@@ -1,0 +1,491 @@
+# Backend Development – Day 2 & Day 3 Notes
+
+## DAY 2 – Node.js
+
+### 1. What is Node.js?
+Node.js is a JavaScript runtime environment. It allows us to run JavaScript outside the browser and build backend applications and APIs.
+
+### 2. What is npm?
+npm stands for Node Package Manager. It is used to install and manage packages in Node.js.
+
+```bash
+npm init -y
+npm install express
+npm start
+```
+
+### 3. Modules in Node.js
+Modules help us organize and reuse code.
+
+Since our project uses `"type": "module"`, we use ES Module syntax.
+
+```js
+// Export
+export const add = (a, b) => a + b;
+
+// Import
+import { add } from "./math.js";
+```
+
+### 4. File System (fs)
+The `fs` module helps us create, read, update and delete files.
+
+```js
+import fs from "node:fs";
+
+// Create file
+fs.writeFileSync("notes.txt", "Hello");
+
+// Read file
+const data = fs.readFileSync("notes.txt", "utf-8");
+
+// Add content
+fs.appendFileSync("notes.txt", "\nWelcome");
+
+// Delete file
+fs.unlinkSync("notes.txt");
+```
+
+### 5. Synchronous vs Asynchronous
+
+**Synchronous:** Each operation waits for the previous operation to finish.
+
+**Asynchronous:** The program can continue executing other code while waiting for an asynchronous operation.
+
+### 6. Callback
+A callback is a function passed as an argument to another function. It can be executed later.
+
+### 7. Promise
+A Promise represents the eventual success or failure of an asynchronous operation.
+
+- `then()` – handles success.
+- `catch()` – handles errors.
+
+```js
+const promise = new Promise((resolve, reject) => {
+    resolve("Success");
+});
+
+promise
+    .then((result) => console.log(result))
+    .catch((error) => console.log(error));
+```
+
+### 8. Async / Await
+Async/await provides a simpler way to work with Promises.
+
+```js
+async function getData() {
+    const result = await Promise.resolve("Hello");
+    console.log(result);
+}
+
+getData();
+```
+
+### 9. Path Module
+The `path` module helps us work with file and folder paths.
+
+```js
+import path from "node:path";
+
+console.log(path.basename("/folder/file.txt"));
+console.log(path.extname("file.txt"));
+console.log(path.join("folder", "file.txt"));
+```
+
+### 10. HTTP Server
+Node.js provides the HTTP module to create a server.
+
+```js
+import http from "node:http";
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, {
+        "Content-Type": "text/plain"
+    });
+
+    res.end("Hello Node.js");
+});
+
+server.listen(3000);
+```
+
+### 11. Event Loop
+The Event Loop helps Node.js handle asynchronous operations without blocking the main thread.
+
+Example:
+
+```js
+console.log("First");
+
+setTimeout(() => {
+    console.log("Second");
+}, 0);
+
+Promise.resolve().then(() => {
+    console.log("Third");
+});
+
+console.log("Fourth");
+```
+
+Output:
+
+```text
+First
+Fourth
+Third
+Second
+```
+
+### Day 2 Interview Questions
+
+1. What is Node.js?
+   - Node.js is a JavaScript runtime environment used to build backend applications.
+
+2. What is npm?
+   - npm is a package manager used to install and manage packages.
+
+3. What is synchronous code?
+   - Synchronous code executes one operation at a time and waits for it to finish.
+
+4. What is asynchronous code?
+   - Asynchronous code allows other operations to continue while waiting for an operation to finish.
+
+5. What is a Promise?
+   - A Promise handles asynchronous operations and represents success or failure.
+
+6. What is async/await?
+   - Async/await provides a simpler way to work with Promises.
+
+7. What is the Event Loop?
+   - The Event Loop helps Node.js handle asynchronous operations without blocking the main thread.
+
+---
+
+# DAY 3 – Express.js & MVC
+
+### 1. What is Express.js?
+Express.js is a Node.js web framework. It makes backend development easier and helps us handle routes, requests and responses with less code.
+
+### 2. Node.js vs Express.js
+
+- Node.js – JavaScript runtime environment.
+- Express.js – Framework built on Node.js.
+
+### 3. Create Express Server
+
+```js
+import express from "express";
+
+const app = express();
+
+app.use(express.json());
+
+app.get("/", (req, res) => {
+    res.send("Welcome to Express");
+});
+
+app.listen(3000, () => {
+    console.log("Server running on port 3000");
+});
+```
+
+### 4. HTTP Methods
+
+| Method | Purpose |
+|---|---|
+| GET | Read data |
+| POST | Create data |
+| PUT | Update data |
+| DELETE | Delete data |
+
+### 5. Request and Response
+
+- `req` – Contains information sent by the client.
+- `res` – Used to send a response to the client.
+
+Important properties:
+
+**req.body:** Gets data sent in the request body.
+
+**req.params:** Gets values from the URL path.
+
+**req.query:** Gets query parameters from the URL.
+
+Examples:
+
+```js
+// Body
+req.body.name
+
+// Params: /students/5
+req.params.id
+
+// Query: /students?name=Arun
+req.query.name
+```
+
+### 6. Middleware
+Middleware is a function that executes between the client request and the route handler.
+
+Example:
+
+```js
+function logger(req, res, next) {
+    console.log(req.method, req.url);
+    next();
+}
+
+app.use(logger);
+```
+
+**What is next()?**
+
+`next()` passes control to the next middleware or route handler.
+
+Without calling `next()` or sending a response, the request may remain pending.
+
+### 7. Authentication Middleware
+
+Middleware can check whether a user is allowed to access a route.
+
+```js
+function authMiddleware(req, res, next) {
+    const token = req.headers.authorization;
+
+    if (token === "my-secret-token") {
+        next();
+    } else {
+        res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+}
+```
+
+This is only a basic learning example. Real applications should verify JWT tokens.
+
+### 8. Error Handling
+
+Error-handling middleware has four parameters:
+
+```js
+app.use((err, req, res, next) => {
+    res.status(500).json({
+        message: err.message
+    });
+});
+```
+
+`next(error)` sends an error to the error-handling middleware.
+
+### 9. HTTP Status Codes
+
+| Status | Meaning |
+|---|---|
+| 200 | OK |
+| 201 | Created |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 500 | Internal Server Error |
+
+### 10. MVC Architecture
+
+MVC stands for:
+
+- Model – Handles database structure and data operations.
+- View – Handles user interface.
+- Controller – Handles request logic and sends responses.
+
+In our API project, React can act as the frontend View.
+
+**Folder structure:**
+
+```text
+student-api/
+│
+├── controllers/
+│   └── studentController.js
+│
+├── routes/
+│   └── studentRoutes.js
+│
+├── middleware/
+│
+├── app.js
+└── package.json
+```
+
+### 11. What is a Controller?
+A controller handles the application logic for a request.
+
+Example:
+
+```js
+export const getStudents = (req, res) => {
+    res.json([
+        { id: 1, name: "Arun" },
+        { id: 2, name: "Kumar" }
+    ]);
+};
+```
+
+### 12. What is a Router?
+A router defines API endpoints and connects them to controller functions.
+
+```js
+import express from "express";
+import { getStudents } from "../controllers/studentController.js";
+
+const router = express.Router();
+
+router.get("/", getStudents);
+
+export default router;
+```
+
+### 13. Student Management REST API – CRUD
+
+We implemented four operations.
+
+**GET – Read Students**
+
+```js
+export const getStudents = (req, res) => {
+    res.json(students);
+};
+```
+
+**POST – Add Student**
+
+```js
+export const addStudent = (req, res) => {
+    const student = req.body;
+
+    students.push(student);
+
+    res.status(201).json({
+        message: "Student added successfully",
+        data: student
+    });
+};
+```
+
+**PUT – Update Student**
+
+```js
+export const updateStudent = (req, res) => {
+    const id = Number(req.params.id);
+
+    const student = students.find((s) => s.id === id);
+
+    if (!student) {
+        return res.status(404).json({
+            message: "Student not found"
+        });
+    }
+
+    student.name = req.body.name;
+    student.age = req.body.age;
+
+    res.json({
+        message: "Student updated successfully",
+        data: student
+    });
+};
+```
+
+**DELETE – Remove Student**
+
+```js
+export const deleteStudent = (req, res) => {
+    const id = Number(req.params.id);
+
+    const student = students.find((s) => s.id === id);
+
+    if (!student) {
+        return res.status(404).json({
+            message: "Student not found"
+        });
+    }
+
+    students = students.filter((s) => s.id !== id);
+
+    res.json({
+        message: "Student deleted successfully"
+    });
+};
+```
+
+### 14. Route Configuration
+
+```js
+router.get("/", getStudents);
+router.post("/", addStudent);
+router.put("/:id", updateStudent);
+router.delete("/:id", deleteStudent);
+```
+
+In `app.js`:
+
+```js
+import studentRoutes from "./routes/studentRoutes.js";
+
+app.use("/students", studentRoutes);
+```
+
+### 15. Important JavaScript Concepts Used
+
+**find():** Finds the first matching element.
+
+```js
+students.find((s) => s.id === id);
+```
+
+**filter():** Creates a new array with elements that pass the condition.
+
+```js
+students.filter((s) => s.id !== id);
+```
+
+**push():** Adds an element to the end of an array.
+
+```js
+students.push(student);
+```
+
+**Number():** Converts a value into a number.
+
+```js
+const id = Number(req.params.id);
+```
+
+### Day 3 Interview Questions
+
+1. What is Express.js?
+   - Express.js is a Node.js framework used to build APIs and backend applications.
+
+2. What is routing?
+   - Routing defines how the application responds to different URLs and HTTP methods.
+
+3. What is middleware?
+   - Middleware is a function that executes between the request and response.
+
+4. What is next()?
+   - next() passes control to the next middleware or route handler.
+
+5. What is MVC?
+   - MVC stands for Model, View and Controller. It separates application responsibilities.
+
+6. What is the difference between req.params and req.query?
+   - Params get values from the URL path. Query gets values after the question mark in the URL.
+
+7. What is the purpose of express.json()?
+   - It parses incoming JSON request bodies and makes the data available in req.body.
+
+8. What is a 404 status code?
+   - It means the requested resource was not found.
